@@ -17,7 +17,7 @@ RESTful API para aplicación PlainLaw
 
 ```
 {
-  "email": string required,
+  "username": string min(3) max(20) required,
   "password": string min(3) required,
   "name": string min(3) max(30) required,
   "patLastName": string min(3) max(30) required,
@@ -31,7 +31,7 @@ RESTful API para aplicación PlainLaw
   - Requiere no estar logueado
 ```
 {
-    "email": string required,
+    "username": string min(3) max(20) required,
     "password": string min(3) required
 }
 ```
