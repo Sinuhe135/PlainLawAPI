@@ -6,9 +6,9 @@ async function getAuth(id)
     return rows[0];
 }
 
-async function getAuthByEmail(email)
+async function getAuthByUsername(username)
 {
-    const [rows] = await pool.query('select * from AUTH where email = ?',[email]);
+    const [rows] = await pool.query('select * from AUTH where username = ?',[username]);
     return rows[0]; 
 }
 
@@ -33,4 +33,4 @@ async function editPassword(password,idAuth,idCurrentSession)
     }   
 }
 
-module.exports={getAuthByEmail, getAuth, editPassword};
+module.exports={getAuthByUsername, getAuth, editPassword};

@@ -27,7 +27,7 @@ const numberOfResultRows = 20;
 
 async function getUser(id)
 {
-    const dataSelection = 'USER.id, USER.name, USER.patLastName, USER.matLastName, USER.phone, AUTH.email';
+    const dataSelection = 'USER.id, USER.name, USER.patLastName, USER.matLastName, USER.phone, AUTH.username';
     const [rows] = await pool.query('select ' + dataSelection + ' from USER left join AUTH on USER.id = AUTH.id where USER.status = ? and USER.id = ?',['active',id]);
     return rows[0];
 }
@@ -60,14 +60,14 @@ async function editUser(name,patLastName,matLastName,phone,id)
     return await getUser(id);
 }
 
-async function createUser(name,patLastName,matLastName,phone,email,password)
+async function createUser(name,patLastName,matLastName,phone,username,password)
 {
     const conn = await pool.getConnection();
     try {
         await conn.beginTransaction();
     
         const [result] = await conn.query('insert into USER (name,patLastName,matLastName,phone) values (?,?,?,?)',[name,patLastName,matLastName,phone]);
-        await conn.query(`insert into AUTH (id,email,password) values (${result.insertId},?,?)`,[email,password]);
+        await conn.query(`insert into AUTH (id,username,password) values (${result.insertId},?,?)`,[username,password]);
     
         await conn.commit();
         conn.release();

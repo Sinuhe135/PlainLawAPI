@@ -7,21 +7,15 @@ create table USER(
     patLastName varchar(30) not null,
     matLastName varchar(30) null,
     phone varchar(15) not null,
-    status enum('unverified','active','unactive') not null default 'active',
+    status enum('active','unactive') not null default 'active',
 	registerDate timestamp  not null default current_timestamp
 );
 
 create table AUTH(
 	id int primary key,
-    email varchar(254) unique not null,
+    username varchar(20) unique not null,
     password varchar(60) not null,
     foreign key (id) references USER (id)
-);
-
-create table TOKEN(
-	id varchar(60) primary key,
-    idAuth int not null,
-    foreign key (idAuth) references AUTH(id)
 );
 
 create table SESSION(

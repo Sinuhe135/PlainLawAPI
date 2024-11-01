@@ -5,7 +5,7 @@ const response = require('../../utils/responses.js');
 const cookieProperties = require('./../../utils/cookieProperties.js')
 const bcrypt = require('bcrypt');
 const {generateAccessToken,generateRefreshToken, getRefreshMaxAgeMili} = require('../../jsonWebToken/utils.js')
-const {getAuthByEmail, editPassword} = require('../../databaseUtils/userUtils/auth.js');
+const {getAuthByUsername, editPassword} = require('../../databaseUtils/userUtils/auth.js');
 const {createSession, deleteSession} = require('../../databaseUtils/userUtils/session.js');
 const { createUser, getUser}= require('../../databaseUtils/userUtils/user.js');
 
@@ -20,17 +20,17 @@ async function login(req, res)
         }
         const body = validation.value;
     
-        const auth = await getAuthByEmail(body.email);
+        const auth = await getAuthByUsername(body.username);
         if(!auth)
         {
-            response.error(req,res,'Email o contraseña incorrectos',400);
+            response.error(req,res,'Usuario o contraseña incorrectos',400);
             return;
         }
 
         const resultado = await bcrypt.compare(body.password,auth.password);
         if(!resultado)
         {
-            response.error(req,res,'Email o contraseña incorrectos',400);
+            response.error(req,res,'Usuario o contraseña incorrectos',400);
             return;
         }
 
@@ -42,7 +42,7 @@ async function login(req, res)
         }
 
         await createJWTCookies(res,user);
-        response.success(req,res,{id:user.id,type:user.type},200);
+        response.success(req,res,{id:user.id},200);
 
     } catch (error) {
         console.log(`Hubo un error con ${req.method} ${req.originalUrl}`);
@@ -89,15 +89,15 @@ async function signup(req,res)
         }
         const body = validation.value;
     
-        const auth = await getAuthByEmail(body.email);
+        const auth = await getAuthByUsername(body.username);
         if(auth)
         {
-            response.error(req,res,'El email ya está registrado',400);
+            response.error(req,res,'El nombre de usuario ya está registrado',400);
             return;
         }
     
         const passwordHash = await hashPassword(body.password);
-        const user = await createUser(body.name,body.patLastName,body.matLastName,body.phone,body.email,passwordHash);
+        const user = await createUser(body.name,body.patLastName,body.matLastName,body.phone,body.username,passwordHash);
 
         await createJWTCookies(res,user);
     
@@ -120,7 +120,7 @@ async function changePassword(req, res)
         }
         const body = validation.value;
 
-        let auth = await getAuthByEmail(res.locals.email);
+        let auth = await getAuthByUsername(res.locals.username);
 
         const resultado = await bcrypt.compare(body.password,auth.password);
         if(!resultado)
@@ -149,7 +149,7 @@ async function createJWTCookies(res, user)
 {
     const AccessObject = {
         id:user.id,
-        email:user.email
+        username:user.username
     };
     const session = await createSession(user.id);
 

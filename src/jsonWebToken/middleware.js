@@ -102,7 +102,7 @@ async function checkAccessToken(req,res)
     // }
     
     res.locals.idAuth = payload.id;
-    res.locals.email = payload.email;
+    res.locals.username = payload.username;
     //res.locals.type = payload.type;
 
     return true;
