@@ -2,6 +2,9 @@ const validateSummary = require('./schemas/summary.js');
 const validateParamId = require('../../utils/schemas/paramId.js');
 const validateParamPage = require('../../utils/schemas/paramPage.js');
 const response = require('../../utils/responses.js');
+const {OpenAI} = require("openai");
+
+
 //const {getAllBranches,getNumberOfPages,getBranch, editBranch, deleteBranch, createBranch} = require('../../databaseUtils/branch.js');
 
 // async function getAll(req,res)
@@ -63,6 +66,7 @@ const response = require('../../utils/responses.js');
 //     }
 // }
 
+
 async function postRoot(req,res)
 {
     try {
@@ -73,12 +77,26 @@ async function postRoot(req,res)
             return;
         }
         const body = validation.value;
-
+        
         let proccessedParagraphs = [];
+        let paragraphNumber = 0;
+        while(paragraphNumber<body.termsConditions.length)
+        {
+            const chatGTPResponse = await requestChatGPT(body.termsConditions[paragraphNumber]);
 
-        body.termsConditions.forEach(paragraph => {
-            proccessedParagraphs.push(paragraph);
-        });
+            if(chatGTPResponse !== 'Descartado')
+            {
+                proccessedParagraphs.push(chatGTPResponse);
+            }
+
+            paragraphNumber++;
+        }
+
+        if(proccessedParagraphs.length===0)
+        {
+            response.error(req,res,'No se ha podido resumir',400);
+            return;
+        }
     
         response.success(req,res,proccessedParagraphs,201);
     } catch (error) {
@@ -88,6 +106,25 @@ async function postRoot(req,res)
     }
 }
 
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
+const systemPrompt = "Dado un párrafo de términos y condiciones de una red social, responde según corresponda:\n\nSi el párrafo aporta información sobre derechos o responsabilidades, responde `Resumen - $resumen_va_aqui`.\nSi el párrafo parece un subtítulo, responde `Subtitulo - $subtitulo_va_aqui`.\nSi no se cumple ninguna de las dos condiciones, responde `Descartado`";
 
+async function requestChatGPT(paragraph)
+{
+    const completion = await openai.chat.completions.create({
+        model: "ft:gpt-3.5-turbo-0125:personal:plainlaw:AQVf33MU",
+        messages: [
+            { role: "system", content: systemPrompt },
+            {
+                role: "user",
+                content: paragraph,
+            },
+        ],
+    });
+
+    return completion.choices[0].message.content;
+}
 
 module.exports={postRoot};
