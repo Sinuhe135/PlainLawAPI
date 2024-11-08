@@ -15,4 +15,8 @@ router.post('/',requireLoggedIn, async (req,res)=>{
     await controller.postRoot(req,res);
 });
 
+router.post('/sign',requireLoggedIn, async (req,res)=>{
+    await controller.postSign(req,res);
+});
+
 module.exports = router;

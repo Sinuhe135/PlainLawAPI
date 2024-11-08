@@ -1,4 +1,4 @@
-const validateSummary = require('./schemas/summary.js');
+const validateTermsConditions = require('./schemas/termsConditions.js');
 const validateParamId = require('../../utils/schemas/paramId.js');
 const validateParamPage = require('../../utils/schemas/paramPage.js');
 const response = require('../../utils/responses.js');
@@ -70,7 +70,7 @@ const {OpenAI} = require("openai");
 async function postRoot(req,res)
 {
     try {
-        const validation = validateSummary(req.body);
+        const validation = validateTermsConditions(req.body);
         if(validation.error)
         {
             response.error(req,res,validation.error.details[0].message,400);

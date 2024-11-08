@@ -29,6 +29,7 @@ create table SUMMARY(
 	id int primary key auto_increment,
     site varchar(50) not null,
     content text not null,
+    notes tinytext null,
 	registerDate timestamp  not null default current_timestamp,
     idUser int not null,
     foreign key (idUser) references USER	(id)
