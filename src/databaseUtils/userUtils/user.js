@@ -41,6 +41,7 @@ async function deleteUser(id)
         await pool.query('delete from SESSION where idAuth = ?',[id]);
         await pool.query('update USER set status = ? where id = ?',['unactive',id]);
         await pool.query('delete from AUTH where id = ?',[id]);
+        await pool.query('delete from SUMMARY where iduser = ?',[id]);
     
         await conn.commit();
         conn.release();

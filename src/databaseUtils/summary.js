@@ -7,8 +7,8 @@ async function getAllSummaries(pageNumber,idUser)
     const rowsToSkip = (pageNumber-1)*numberOfResultRows;
     const pagination = 'order by id desc LIMIT '+numberOfResultRows.toString()+' offset ?'; //rowsToSkip
     
-    const dataSelection = 'id,site, content, date';
-    const [rows] = await pool.query('select ' + dataSelection + ' from SUMMARY where idUser = ? '+pagination, [rowsToSkip,idUser]);
+    const dataSelection = "id,site, DATE_FORMAT(registerDate, '%Y-%m-%d') as registerDate";
+    const [rows] = await pool.query('select ' + dataSelection + ' from SUMMARY where idUser = ? '+pagination, [idUser,rowsToSkip]);
     return rows;
 }
 
@@ -27,7 +27,7 @@ async function getNumberOfPages(idUser)
 
 async function getSummary(id, idUser)
 {
-    const dataSelection = 'id,site, content, date';
+    const dataSelection = "id,site, content,notes, DATE_FORMAT(registerDate, '%Y-%m-%d') as registerDate";
     const [rows] = await pool.query('select ' + dataSelection + ' from SUMMARY where id = ? and idUser = ?',[id,idUser]);
     return rows[0];
 }
@@ -41,7 +41,7 @@ async function deleteSummary(id, idUser)
 async function createSummary(site,content,notes,idUser)
 {
     const [result] = await pool.query('insert into SUMMARY (site,content,notes,idUser) values (?,?,?,?)',[site,content,notes,idUser]);
-    return await getSummary(result.insertId);
+    return {id:result.insertId};
 }
 
 module.exports={getAllSummaries,getNumberOfPages,getSummary,createSummary, deleteSummary};
